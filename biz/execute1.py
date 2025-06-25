@@ -1,8 +1,8 @@
 import subprocess
-# from .generate_mmds import GetChunkedmmds
-# from .cleanup_mmds import CleanUpChunkedmmd
-# from .cyc_cya_merge import MergeCYCAndCYA
-# from .cyc_cya_chunk import ChunkCYCAndCYA
+from .generate_mmds import GetChunkedmmds
+from .cleanup_mmds import CleanUpChunkedmmd
+from .cyc_cya_merge import MergeCYCAndCYA
+from .cyc_cya_chunk import ChunkCYCAndCYA
 from .revision_notes_converter import RNExecution
 
 import shutil
@@ -89,4 +89,4 @@ def ReadInputCSV(csv_file_path):
 ReadInputCSV("/Users/pranavreddy/Desktop/RNConvertion/RivisionNote_uploads - Sheet1.csv")
 #StartExecution("test_cID","/Users/pranavreddy/Desktop/RNConvertion/inputs_files/Heredity.mmd")
 
-# python3 -m biz.execute1
+#python3 -m biz.execute1
