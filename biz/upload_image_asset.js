@@ -4,7 +4,7 @@ import * as fsPromise from 'fs/promises';
 import path from 'path';
 import url from 'url';
 
-const token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhVVNzVzhHSTAzZHlRMEFJRlZuOTIiLCJkX3R5cGUiOiJ3ZWIiLCJkaWQiOiJiZjEyMDg0OC0yNDNlLTRjOGYtOTQ2OC00OTFjMWIwNWVmNjEiLCJlX2lkIjoiMjk2OTg4NjgzIiwiZXhwIjoxNzQ5MDM5MzU1LCJpYXQiOiIyMDI1LTA2LTA0VDExOjE1OjU1LjI5OTU0MjQ1M1oiLCJpc3MiOiJhdXRoZW50aWNhdGlvbi5hbGxlbi1zdGFnZSIsImlzdSI6IiIsInB0IjoiVEVBQ0hFUiIsInNpZCI6ImFiZTdiYjcwLTkyN2YtNDhmYy05NzAyLTJhNWRhZmVjMzRiOSIsInRpZCI6ImFVU3NXOEdJMDNkeVEwQUlGVm45MiIsInR5cGUiOiJhY2Nlc3MiLCJ1aWQiOiJjTkc4TmpIbW9pNkVTNGFQQ1RJQVIifQ.zJMt14IMfhyrUFr6XpLCescM4XXv1ZKccl8GX7KWQ10";
+const token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhVVNzVzhHSTAzZHlRMEFJRlZuOTIiLCJkX3R5cGUiOiJ3ZWIiLCJkaWQiOiJiZjEyMDg0OC0yNDNlLTRjOGYtOTQ2OC00OTFjMWIwNWVmNjEiLCJlX2lkIjoiMjk2OTg4NjgzIiwiZXhwIjoxNzUwODI4NTQ4LCJpYXQiOiIyMDI1LTA2LTI1VDA0OjE1OjQ4LjUwMjUwMTI3OVoiLCJpc3MiOiJhdXRoZW50aWNhdGlvbi5hbGxlbi1zdGFnZSIsImlzdSI6IiIsInB0IjoiVEVBQ0hFUiIsInNpZCI6ImM3OGFjYzk5LTg4NzUtNGMyOC1hNDgwLTZmN2U0MGYyOWIyMCIsInRpZCI6ImFVU3NXOEdJMDNkeVEwQUlGVm45MiIsInR5cGUiOiJhY2Nlc3MiLCJ1aWQiOiJjTkc4TmpIbW9pNkVTNGFQQ1RJQVIifQ.-5nAHTxZayJYhHuo4ytDacvlsvs0w4lE2mITLQlaw50";
 const image_asset_output_folder = "/Users/pranavreddy/Desktop/RNConvertion/image_assets"
 
 const taxonomyPayloadTemplate = {
@@ -52,18 +52,23 @@ const headers = {
 };
 
 
-async function getMaterialIdFromBulkCreate(file_name,source_id) {
+async function getMaterialIdFromBulkCreate(file_name,source_id,contentClass,subject,title,caption) {
   
     const payload = {
       requests: [taxonomyPayloadTemplate]
     };
 
-    payload["requests"][0]["filename"] = "testFileName";
+    payload["requests"][0]["filename"] = file_name;
     payload["requests"][0]["learning_material"]["name"] = file_name;
-
+    payload["requests"][0]["learning_material"]["description"] = caption
     payload["requests"][0]["learning_material"]["material_tags"] = {
-        source_id: source_id
+        SourceId: source_id,
+        Source:"Study Modules",
+        SubjectV1:subject,
+        TopicV1:title,
     };
+
+    payload["requests"][0]["learning_material"]["hashtags"] = [contentClass]
 
     console.log(JSON.stringify(payload));
 
@@ -309,16 +314,16 @@ async function getCDNUrl(id){
 }
 
 
-export async function UploadImage(imageUrl,source_id) {
+export async function UploadImage(imageUrl,source_id,chapterName,contentClass,subject,caption) {
     try{
         const parsedUrl = new URL(imageUrl); // Example: 'https://example.com/images/photo.png'
-        const fileNameWithExt = path.basename(parsedUrl.pathname); // 'photo.png'
-
-        const file_name = path.parse(fileNameWithExt).name;
+        const fileNameWithExt = path.basename(parsedUrl.pathname); // e.g., 'photo.png'
+        const originalName = path.parse(fileNameWithExt).name;     // 'photo'
+        const file_name = `${chapterName}_${originalName}`;        // 'chapter1_photo'
 
         console.log(file_name);
 
-        const c_id = await getMaterialIdFromBulkCreate(file_name,source_id);
+        const c_id = await getMaterialIdFromBulkCreate(file_name,source_id,contentClass,subject,chapterName,caption);
         console.log(c_id);
 
         const filePath = await downloadImage(imageUrl);

@@ -16,48 +16,51 @@ const cycFilePath = "/Users/pranavreddy/Desktop/RNConvertion/output_jsons/cyc_cy
 const finaloutputPath = '/Users/pranavreddy/Desktop/RNConvertion/output_jsons/final_list_output.json';
 
 const contentId = process.argv[2]; // 0 = node, 1 = script name, 2 = first user arg
+const chapterName = process.argv[3]  //title
+const contentClass = process.argv[4]  //class
+const subject = process.argv[5] //subject
 
 console.log("Received content ID:", contentId);
 
 const resultArray = [];
 
-async function processFile(filePath, title,posn) {
-    function parseTextWithLatex(text) {
-        const latexRegex = /\$(.*?)\$/g; // Regex to detect LaTeX equations between $
-        let formattedText = [];
-        let lastIndex = 0;
-        
-        // Match LaTeX equations
-        let match;
-        while ((match = latexRegex.exec(text)) !== null) {
-          // Text before LaTeX equation
-          if (match.index > lastIndex) {
-            formattedText.push({
-              type: 'text',
-              text: text.slice(lastIndex, match.index)
-            });
-          }
-          // LaTeX equation (inline)
-          formattedText.push({
-            type: 'katex',
-            equation: match[1].trim(),
-            inline: true, // Ensure it's inline
-            version: 1
-          });
-          lastIndex = latexRegex.lastIndex;
-        }
-        
-        // Add the remaining part of the text after the last match
-        if (lastIndex < text.length) {
-          formattedText.push({
-            type: 'text',
-            text: text.slice(lastIndex)
-          });
-        }
+function parseTextWithLatex(text) {
+    const latexRegex = /\$(.*?)\$/g; // Regex to detect LaTeX equations between $
+    let formattedText = [];
+    let lastIndex = 0;
     
-        return formattedText;
+    // Match LaTeX equations
+    let match;
+    while ((match = latexRegex.exec(text)) !== null) {
+      // Text before LaTeX equation
+      if (match.index > lastIndex) {
+        formattedText.push({
+          type: 'text',
+          text: text.slice(lastIndex, match.index)
+        });
+      }
+      // LaTeX equation (inline)
+      formattedText.push({
+        type: 'katex',
+        equation: match[1].trim(),
+        inline: true, // Ensure it's inline
+        version: 1
+      });
+      lastIndex = latexRegex.lastIndex;
+    }
+    
+    // Add the remaining part of the text after the last match
+    if (lastIndex < text.length) {
+      formattedText.push({
+        type: 'text',
+        text: text.slice(lastIndex)
+      });
     }
 
+    return formattedText;
+}
+
+async function processFile(filePath, title,posn) {
     const fileData = await fs.promises.readFile(filePath, 'utf-8');
     const lines = fileData.split('\n');
   
@@ -177,7 +180,7 @@ async function convertMarkdownNodeToLexicalNode(node) {
     console.log(`convertMarkdownNodeToLexicalNode this called for ${node.type}`)
     if (node.type === 'image') {
         console.log("came to image part in default type")
-        const image_url = await UploadImage(node.url,contentId);
+        const image_url = await UploadImage(node.url,contentId,chapterName,contentClass,subject);
         return {
             type: 'image',
             src: image_url,
@@ -203,18 +206,6 @@ async function convertMarkdownNodeToLexicalNode(node) {
     }
     if (node.type === 'html' && node.value.match(/<img\s+src=["']([^"']+)["'][^>]*>/)) {
         console.log("came to html type ")
-        const imgUrlMatch = node.value.match(/<img\s+src=["']([^"']+)["'][^>]*>/);
-        let imgUrl = imgUrlMatch ? imgUrlMatch[1] : '';
-        if(imgUrl!==""){
-            let allen_url = await UploadImage(imgUrl,contentId);
-            if(allen_url !=="")
-            {
-                imgUrl = allen_url
-            }
-        }
-
-        console.log(imgUrl)
-
         const altTextMatch = node.value.match(/<img\s+alt=["']([^"']+)["'][^>]*>/);
         let altText = altTextMatch ? altTextMatch[1] : '';
         // Extract caption from <figcaption> if present
@@ -222,6 +213,17 @@ async function convertMarkdownNodeToLexicalNode(node) {
         if (captionMatch && captionMatch[1].trim()) {
           altText = captionMatch[1].trim();
         }
+        const imgUrlMatch = node.value.match(/<img\s+src=["']([^"']+)["'][^>]*>/);
+        let imgUrl = imgUrlMatch ? imgUrlMatch[1] : '';
+        if(imgUrl!==""){
+            let allen_url = await UploadImage(imgUrl,contentId,chapterName,contentClass,subject,altText);
+            if(allen_url !=="")
+            {
+                imgUrl = allen_url
+            }
+        }
+
+        console.log(imgUrl)
 
         return {
             type: 'image',
@@ -459,7 +461,7 @@ async function parseMmdToLexicalJson(inputFilePath, posn, title) {
 
     // Helper to create lexical paragraph node
     function makeParagraphNode(text) {
-      return {
+    return {
         type: 'paragraph',
         direction: 'ltr',
         format: '',
@@ -467,17 +469,7 @@ async function parseMmdToLexicalJson(inputFilePath, posn, title) {
         version: 1,
         textFormat: 0,
         textStyle: '',
-        children: [
-          {
-            type: 'text',
-            text: text,
-            format: 0,
-            detail: 0,
-            mode: 'normal',
-            style: '',
-            version: 1,
-          },
-        ],
+        children: text,
         tag: 'p',
         id: '',
       };
@@ -493,7 +485,7 @@ async function parseMmdToLexicalJson(inputFilePath, posn, title) {
         question: {
           configData: {
             root: {
-              children: [makeParagraphNode(questionText)],
+              children: [makeParagraphNode(parseTextWithLatex(questionText))],//[makeParagraphNode(questionText)],
               direction: 'ltr',
               format: '',
               indent: 0,
@@ -505,7 +497,7 @@ async function parseMmdToLexicalJson(inputFilePath, posn, title) {
         answer: {
           configData: {
             root: {
-              children: [makeParagraphNode(answerText)],
+              children: [makeParagraphNode(parseTextWithLatex(answerText))],//[makeParagraphNode(answerText)],
               direction: 'ltr',
               format: '',
               indent: 0,

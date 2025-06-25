@@ -11,7 +11,7 @@ BULK_API_URL = "https://bff.allen-stage.in/internal-bff/api/v1/learningMaterials
 
 UPLOAD_RAW_DATA_URL = "https://bff.allen-stage.in/lmm/uploadRawData"
 
-TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhVVNzVzhHSTAzZHlRMEFJRlZuOTIiLCJkX3R5cGUiOiJ3ZWIiLCJkaWQiOiJiZjEyMDg0OC0yNDNlLTRjOGYtOTQ2OC00OTFjMWIwNWVmNjEiLCJlX2lkIjoiMjk2OTg4NjgzIiwiZXhwIjoxNzQ5MDM5MzU1LCJpYXQiOiIyMDI1LTA2LTA0VDExOjE1OjU1LjI5OTU0MjQ1M1oiLCJpc3MiOiJhdXRoZW50aWNhdGlvbi5hbGxlbi1zdGFnZSIsImlzdSI6IiIsInB0IjoiVEVBQ0hFUiIsInNpZCI6ImFiZTdiYjcwLTkyN2YtNDhmYy05NzAyLTJhNWRhZmVjMzRiOSIsInRpZCI6ImFVU3NXOEdJMDNkeVEwQUlGVm45MiIsInR5cGUiOiJhY2Nlc3MiLCJ1aWQiOiJjTkc4TmpIbW9pNkVTNGFQQ1RJQVIifQ.zJMt14IMfhyrUFr6XpLCescM4XXv1ZKccl8GX7KWQ10"
+TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhVVNzVzhHSTAzZHlRMEFJRlZuOTIiLCJkX3R5cGUiOiJ3ZWIiLCJkaWQiOiJiZjEyMDg0OC0yNDNlLTRjOGYtOTQ2OC00OTFjMWIwNWVmNjEiLCJlX2lkIjoiMjk2OTg4NjgzIiwiZXhwIjoxNzUwODM2OTQyLCJpYXQiOiIyMDI1LTA2LTI1VDA2OjM1OjQyLjM0ODQxNTkxN1oiLCJpc3MiOiJhdXRoZW50aWNhdGlvbi5hbGxlbi1zdGFnZSIsImlzdSI6IiIsInB0IjoiVEVBQ0hFUiIsInNpZCI6ImM3OGFjYzk5LTg4NzUtNGMyOC1hNDgwLTZmN2U0MGYyOWIyMCIsInRpZCI6ImFVU3NXOEdJMDNkeVEwQUlGVm45MiIsInR5cGUiOiJhY2Nlc3MiLCJ1aWQiOiJjTkc4TmpIbW9pNkVTNGFQQ1RJQVIifQ.bwlIUDs5ic9-jjpJvjLdu9DWScI2N7p8nlFnlmco5gM"
 
 HEADERS = {
     'Content-Type': 'application/json',
@@ -227,8 +227,9 @@ def RNExecution(original_file_path,source_id):
 
 
         rn_rawData = createRN(ordered_content_ids)
-        print(rn_rawData)
-        CreateRevisionNotes(rn_rawData,original_file_path,source_id)
+        rn_id = CreateRevisionNotes(rn_rawData,original_file_path,source_id)
+        print(f"final rn_id is {rn_id}")
+        return rn_id
     except: 
         print("Fsomething went wrong")
 
@@ -238,4 +239,4 @@ def RNExecution(original_file_path,source_id):
         print(cid)
 
 
-#RNExecution("/Users/pranavreddy/Downloads/Foundation/pdf_uploads/Excretion/Excretion.mmd","abc123")
+#RNExecution("/Users/pranavreddy/Desktop/RNConvertion/inputs_files/Heredity1.mmd","abc123")
